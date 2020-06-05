@@ -1,0 +1,27 @@
+{
+  "name": "bitbucket-report-sonarqube",
+  "bin": "src/index.js",
+  "version": "1.0.21",
+  "description": "Commandline tool to use the management APIs of SAP API Management",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reiniervanderhoeven/bitbucket-report-sonarqube.git"
+  },
+  "keywords": [
+    "bitbucket",
+    "report",
+    "sonarqube"
+  ],
+  "author": "Reinier van der Hoeven",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reiniervanderhoeven/bitbucket-report-sonarqube/issues"
+  },
+  "homepage": "https://github.com/reiniervanderhoeven/bitbucket-report-sonarqube#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "commander": "^4.1.1"
+  },
+  "devDependencies": {}
+}
