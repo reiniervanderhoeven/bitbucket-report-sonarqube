@@ -2,17 +2,36 @@
 const program = require('commander');
 const axios = require('axios');
 const { version, name, description } = require('../package.json');
+const fs = require('fs')
 
 program.name(name)
   .version(version, '-v, --version')
   .requiredOption('-r, --reposlug <reposlug>')
   .requiredOption('-c, --commit <commit>')
   .requiredOption('-i, --reportId <reportId>')
-  .requiredOption('-h, --host <host>')
   .requiredOption('-p, --projectName <projectName>')
-  .requiredOption('-t, --token <token>')
+  .option('-h, --host <host>')
+  .option('-t, --token <token>')
   .description(description)
   .action(async () => {
+    if(fs.existsSync('sonar-project.properties')) {
+      const sonarProps = fs.readFileSync('sonar-project.properties')
+      const properties = sonarProps.toString().split('\r\n').map(prop => prop.split('='))
+      if(!program.host){
+        const host = properties.find(prop => prop[0] === 'sonar.host.url');
+        if(!host){
+          throw new Error('Missing host property')
+        }
+        program.host = host[1]
+      }
+      if(!program.token){
+        const login = properties.find(prop => prop[0] === 'sonar.login');
+        if(!login){
+          throw new Error('Missing host property')
+        }
+        program.token = login[1]
+      }
+    }
     try {
       const res = await axios.get(`${program.host}/api/qualitygates/project_status?projectKey=${program.projectName}`, { auth: { username: program.token, password: '' } });
       const { projectStatus } = res.data;
@@ -31,20 +50,28 @@ program.name(name)
       };
 
       await axios.delete(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}`, {
-        proxy: {
-          host: 'localhost',
-          port: 29418
-        }
+        auth: {
+          username: process.env.BITBUCKET_USERNAME,
+          password: process.env.BITBUCKET_PASSWORD,
+        },
+        // proxy: {
+        //   host: 'localhost',
+        //   port: 29418
+        // }
       });
 
       console.log('deleted report');
 
       await axios.put(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}`,
         report, {
-          proxy: {
-            host: 'localhost',
-            port: 29418
-          }
+          auth: {
+          username: process.env.BITBUCKET_USERNAME,
+          password: process.env.BITBUCKET_PASSWORD,
+        },
+        // proxy: {
+        //   host: 'localhost',
+        //   port: 29418
+        // }
         });
 
       console.log('created report');
@@ -71,9 +98,10 @@ program.name(name)
         }
         return {
           external_id: issue.key,
-          annotation_type: issue.type,
+          annotation_type: 'BUG',
           summary: issue.message,
           details: `effort: ${issue.effort}`,
+          result: 'FAILED',
           severity,
           path: issue.component.split(':').pop(),
           line: issue.line,
@@ -81,13 +109,12 @@ program.name(name)
       });
 
       await axios.post(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}/annotations`,
-        issues, {
-          proxy: {
-            host: 'localhost',
-            port: 29418
+        [issues[0]], {
+          auth: {
+            username: process.env.BITBUCKET_USERNAME,
+            password: process.env.BITBUCKET_PASSWORD,
           }
-        });
-      console.log('created annotations');
+      });
     } catch (e) {
       e.response ? console.log(e.response.data) : console.log(e.message)
       process.exit(1);
