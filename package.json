@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/reiniervanderhoeven/bitbucket-report-sonarqube#readme",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "commander": "^4.1.1"
   },
   "devDependencies": {}
