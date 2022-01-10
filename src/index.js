@@ -112,13 +112,15 @@ program.name(name)
         }
       })
 
-      await axios.post(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}/annotations`,
-        issues, {
-          proxy: {
-            host: 'localhost',
-            port: 29418
-          }
-        })
+      if (issues.length > 0) {
+        await axios.post(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}/annotations`,
+            issues, {
+              proxy: {
+                host: 'localhost',
+                port: 29418
+              }
+            })
+      }
     } catch (e) {
       e.response ? console.log(e.response.data) : console.log(e.message)
       process.exit(1)
