@@ -113,7 +113,7 @@ program.name(name)
       })
 
       await axios.post(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}/annotations`,
-        [issues[0]], {
+        issues, {
           proxy: {
             host: 'localhost',
             port: 29418
