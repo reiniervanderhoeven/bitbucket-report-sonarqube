@@ -26,7 +26,10 @@ program.name(name)
         program.host = host[1]
       }
       if (!program.token) {
-        const login = properties.find(prop => prop[0] === 'sonar.login')
+        let login = properties.find(prop => prop[0] === 'sonar.login');
+        if (!login) {
+          login = properties.find(prop => prop[0] === 'sonar.token');
+        }
         if (!login) {
           console.log('Missing token property')
           process.exit(1)
@@ -58,7 +61,7 @@ program.name(name)
 
       await axios.delete(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}`, {
         proxy: {
-          host: 'localhost',
+          host: '127.0.0.1',
           port: 29418
         }
       })
@@ -68,7 +71,7 @@ program.name(name)
       await axios.put(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}`,
         report, {
           proxy: {
-            host: 'localhost',
+            host: '127.0.0.1',
             port: 29418
           }
         })
@@ -116,7 +119,7 @@ program.name(name)
         await axios.post(`https://api.bitbucket.org/2.0/repositories/${program.reposlug}/commit/${program.commit}/reports/${program.reportId}/annotations`,
             issues.slice(0,99), {
               proxy: {
-                host: 'localhost',
+                host: '127.0.0.1',
                 port: 29418
               }
             })
